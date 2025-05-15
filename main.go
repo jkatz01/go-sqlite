@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
+	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
 	"log"
 	"os"
-	"time"	
-	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
+	"time"
 )
 
 type host_data struct {
@@ -14,8 +14,8 @@ type host_data struct {
 }
 
 func main() {
-	//os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records. 
-                                    // SQLite is a file based database.
+	//os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
+	// SQLite is a file based database.
 
 	log.Println("Creating sqlite-database.db...")
 	file, err := os.Create("sqlite-database.db") // Create SQLite file
@@ -26,10 +26,10 @@ func main() {
 	log.Println("sqlite-database.db created")
 
 	sqliteDatabase, _ := sql.Open("sqlite3", "./sqlite-database.db") // Open the created SQLite File
-	defer sqliteDatabase.Close() // Defer Closing the database
-	create_host_table(sqliteDatabase) // Create Database Tables
+	defer sqliteDatabase.Close()                                     // Defer Closing the database
+	create_host_table(sqliteDatabase)                                // Create Database Tables
 
-        // INSERT RECORDS
+	// INSERT RECORDS
 	//insertStudent(sqliteDatabase, "0001", "Liana Kim", "Bachelor")
 	//insertStudent(sqliteDatabase, "0002", "Glen Rangel", "Bachelor")
 	host_1 := host_data{host_name: "uhhum", last_ping: time.Now()}
@@ -59,7 +59,7 @@ func create_host_table(db *sql.DB) {
 		"last_ping" TEXT		
 	  );` // SQL Statement for Create Table
 
-	log.Println("Create host table...")
+	//log.Println("Create host table...")
 	statement, err := db.Prepare(create_host_table_SQL) // Prepare SQL Statement
 	if err != nil {
 		log.Fatal(err.Error())
@@ -69,15 +69,15 @@ func create_host_table(db *sql.DB) {
 }
 
 // We are passing db reference connection from main to our method with other parameters
-func insert_host(db *sql.DB, host host_data ) {
+func insert_host(db *sql.DB, host host_data) {
 	log.Println("Inserting host record ...")
 	// TODO: change REPLACE in query to update + insert if fails
 	// 	 because REPLACE changes the primary key id
 	insert_host_SQL := `
 		REPLACE INTO hosts(host_name, last_ping) 
 		VALUES (?, ?)`
-	statement, err := db.Prepare(insert_host_SQL) // Prepare statement. 
-                                                   // This is good to avoid SQL injections
+	statement, err := db.Prepare(insert_host_SQL) // Prepare statement.
+	// This is good to avoid SQL injections
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
