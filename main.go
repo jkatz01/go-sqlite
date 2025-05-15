@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"time"
+	"net/http"
+	"encoding/json"
 )
 
 type host_data struct {
@@ -13,8 +15,13 @@ type host_data struct {
 	last_ping time.Time
 }
 
+type ping_request struct {
+	Host_name string `json:"host_name"`
+	Ping_time string `json:"ping_time"`
+}
+// TODO: change naming 
 func main() {
-	//os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
+	os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
 	// SQLite is a file based database.
 
 	log.Println("Creating sqlite-database.db...")
@@ -49,6 +56,21 @@ func main() {
 
 	// DISPLAY INSERTED RECORDS
 	displayStudents(sqliteDatabase)
+
+	http.HandleFunc("/send_ping", receive_ping)
+	log.Println("Server listening on port 1337")
+	log.Fatal(http.ListenAndServe(":1337", nil))
+}
+
+func receive_ping(w http.ResponseWriter, req *http.Request) {
+	var beacon ping_request
+	err := json.NewDecoder(req.Body).Decode(&beacon)
+	if err != nil {
+		// HTTP 400
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		log.Println("Error: bad request")
+	}
+	log.Println("User request | host: ", beacon.Host_name, " time: ", beacon.Ping_time)
 }
 
 func create_host_table(db *sql.DB) {
