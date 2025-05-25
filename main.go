@@ -19,6 +19,9 @@ type ping_request struct {
 	Host_name string `json:"host_name"`
 	Ping_time string `json:"ping_time"`
 }
+
+var sqliteDatabase *sql.DB
+
 // TODO: change naming 
 func main() {
 	os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
@@ -32,7 +35,7 @@ func main() {
 	file.Close()
 	log.Println("sqlite-database.db created")
 
-	sqliteDatabase, _ := sql.Open("sqlite3", "./sqlite-database.db") // Open the created SQLite File
+	sqliteDatabase, _ = sql.Open("sqlite3", "./sqlite-database.db") // Open the created SQLite File
 	defer sqliteDatabase.Close()                                     // Defer Closing the database
 	create_host_table(sqliteDatabase)                                // Create Database Tables
 
@@ -70,7 +73,14 @@ func receive_ping(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		log.Println("Error: bad request")
 	}
-	log.Println("User request | host: ", beacon.Host_name, " time: ", beacon.Ping_time)
+	ping_time, _ := time.Parse(time.StampMilli, beacon.Ping_time)
+	received_host := host_data{beacon.Host_name, ping_time}
+	//log.Println("User request | host: ", beacon.Host_name, " time: ", beacon.Ping_time)
+
+	insert_host(sqliteDatabase, received_host)
+
+	// TEMPORARY / should be an API call
+	displayStudents(sqliteDatabase)
 }
 
 func create_host_table(db *sql.DB) {
@@ -103,7 +113,7 @@ func insert_host(db *sql.DB, host host_data) {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	_, err = statement.Exec(host.host_name, host.last_ping)
+	_, err = statement.Exec(host.host_name, host.last_ping.Format(time.StampMilli))
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
