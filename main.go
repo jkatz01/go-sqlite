@@ -65,8 +65,9 @@ func main() {
 	log.Fatal(http.ListenAndServe(":1337", nil))
 }
 func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT")
+	(*w).Header().Set("Access-Control-Allow-Methods", "*")
 	(*w).Header().Set("Access-Control-Allow-Headers", "*")
 }
 
@@ -85,6 +86,11 @@ func receive_ping(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		log.Println("Error: bad request", err)
 	}
+	data := ping_request{Host_name: "Guh", Ping_time: "guddy"}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(data)
+
 	ping_time, _ := time.Parse(time.StampMilli, beacon.Ping_time)
 	received_host := host_data{beacon.Host_name, ping_time}
 

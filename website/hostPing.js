@@ -1,22 +1,31 @@
 function getTimestamp() {
 	let d = new Date();
 	const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-	var datestring = monthNames[(d.getMonth())] + " " + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + "." + d.getMilliseconds();
+	var datestring = monthNames[(d.getMonth())] + " " + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds() + "." + String(d.getMilliseconds()).padStart(3, '0');
 	return datestring;
 }
 
 function someText() {
 	
 	curr_time = getTimestamp();
-	document.getElementById("demo").innerHTML = "<p>Date: " + curr_time+ "</p>";
+	document.getElementById("date").innerHTML = "Date: " + curr_time;
 	
 }
 
-fetch('http://localhost:1337/send_ping', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({host_name: 'safafrvfsd', last_ping: 'May 25 20:34:28.818'})
-}).then(res => res.json())
-  .then(res => console.log(res));
+function pingRandomHost() {
+	const hostNames = ["Somebody", "someone", "some dude", "buddy", "guh", "jsbrowser", "mike", "gus", "walter"];
+
+	fetch('http://localhost:1337/send_ping', {
+		mode: 'no-cors',
+	method: 'POST',
+	headers: {
+		'Content-Type': 'application/json'
+	},
+	body: JSON.stringify({host_name: hostNames[Math.floor(Math.random() * 9)], ping_time: getTimestamp()})
+	}).then(res => res.json())
+	.then(res => console.log(res));
+}
+
+
+pingRandomHost();
+someText();

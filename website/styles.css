@@ -14,8 +14,8 @@ a {
 p {
 	color: black;
 
-	margin-top: 	10px;
-	margin-bottom: 	10px;
+	margin-top: 	5px;
+	margin-bottom: 	5px;
 
 	font-size: 2em;
 }
@@ -24,9 +24,10 @@ button {
 	font-size: 1em;
 }
 
-table, th {
+table, th, tr, td {
 	border: 1px solid black;
 	background-color: #aaaaaa;
+	font-size: 1.2em;
 }
 tr:nth-child(odd) td {
 
@@ -39,6 +40,6 @@ tr:nth-child(even) td {
 	background-color: #9f9f9f;
 }
 div {
-	width: 50em;
+	width: 80em;
 	margin: auto;
 }
