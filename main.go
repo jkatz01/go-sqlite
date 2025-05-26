@@ -10,6 +10,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/rs/cors"
+
 	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
 )
 
@@ -59,11 +61,14 @@ func main() {
 	// DISPLAY INSERTED RECORDS
 	displayStudents(sqliteDatabase)
 
-	http.HandleFunc("/send_ping", receive_ping)
-	http.HandleFunc("/get_list", print_list)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/send_ping", receive_ping)
+	mux.HandleFunc("/get_list", print_list)
 	log.Println("Server listening on port 1337")
-	log.Fatal(http.ListenAndServe(":1337", nil))
+	handler := cors.Default().Handler(mux)
+	log.Fatal(http.ListenAndServe(":1337", handler))
 }
+
 func enableCors(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")

@@ -16,7 +16,7 @@ function pingRandomHost() {
 	const hostNames = ["Somebody", "someone", "some dude", "buddy", "guh", "jsbrowser", "mike", "gus", "walter"];
 
 	fetch('http://localhost:1337/send_ping', {
-		mode: 'no-cors',
+	mode: 'no-cors',
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json'
