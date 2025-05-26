@@ -1,0 +1,44 @@
+body {
+	background-color: #bfbfbf;
+}
+
+h1 {
+	color: black;
+	font-size: 6em;
+}
+
+a {
+	color: black;
+}
+
+p {
+	color: black;
+
+	margin-top: 	10px;
+	margin-bottom: 	10px;
+
+	font-size: 2em;
+}
+
+button {
+	font-size: 1em;
+}
+
+table, th {
+	border: 1px solid black;
+	background-color: #aaaaaa;
+}
+tr:nth-child(odd) td {
+
+	border: 1px solid black;
+	background-color: #bfbfbf;
+}
+tr:nth-child(even) td {
+
+	border: 1px solid black;
+	background-color: #9f9f9f;
+}
+div {
+	width: 50em;
+	margin: auto;
+}

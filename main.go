@@ -2,13 +2,15 @@ package main
 
 import (
 	"database/sql"
-	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
-	"log"
-	"os"
-	"time"
-	"net/http"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"os"
+	"time"
+
+	_ "github.com/mattn/go-sqlite3" // Import go-sqlite3 library
 )
 
 type host_data struct {
@@ -23,7 +25,7 @@ type ping_request struct {
 
 var sqliteDatabase *sql.DB
 
-// TODO: change naming 
+// TODO: change naming
 func main() {
 	os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
 	// SQLite is a file based database.
@@ -37,8 +39,8 @@ func main() {
 	log.Println("sqlite-database.db created")
 
 	sqliteDatabase, _ = sql.Open("sqlite3", "./sqlite-database.db") // Open the created SQLite File
-	defer sqliteDatabase.Close()                                     // Defer Closing the database
-	create_host_table(sqliteDatabase)                                // Create Database Tables
+	defer sqliteDatabase.Close()                                    // Defer Closing the database
+	create_host_table(sqliteDatabase)                               // Create Database Tables
 
 	// INSERT RECORDS
 	//insertStudent(sqliteDatabase, "0001", "Liana Kim", "Bachelor")
@@ -53,10 +55,6 @@ func main() {
 	insert_host(sqliteDatabase, host_1)
 	insert_host(sqliteDatabase, host_2)
 	insert_host(sqliteDatabase, host_3)
-	insert_host(sqliteDatabase, host_3)
-	insert_host(sqliteDatabase, host_3)
-	insert_host(sqliteDatabase, host_3)
-	insert_host(sqliteDatabase, host_3)
 
 	// DISPLAY INSERTED RECORDS
 	displayStudents(sqliteDatabase)
@@ -66,20 +64,31 @@ func main() {
 	log.Println("Server listening on port 1337")
 	log.Fatal(http.ListenAndServe(":1337", nil))
 }
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT")
+	(*w).Header().Set("Access-Control-Allow-Headers", "*")
+}
 
 func receive_ping(w http.ResponseWriter, req *http.Request) {
+	enableCors(&w)
+	w.Header().Set("Content-Type", "application/json")
+	res, er := httputil.DumpRequest(req, true)
+	if er != nil {
+		log.Fatal(er)
+	}
+	fmt.Print(string(res))
 	var beacon ping_request
 	err := json.NewDecoder(req.Body).Decode(&beacon)
 	if err != nil {
 		// HTTP 400
 		http.Error(w, "Bad request", http.StatusBadRequest)
-		log.Println("Error: bad request")
+		log.Println("Error: bad request", err)
 	}
 	ping_time, _ := time.Parse(time.StampMilli, beacon.Ping_time)
 	received_host := host_data{beacon.Host_name, ping_time}
 
 	insert_host(sqliteDatabase, received_host)
-
 }
 
 func print_list(w http.ResponseWriter, req *http.Request) {
