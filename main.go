@@ -8,6 +8,7 @@ import (
 	"time"
 	"net/http"
 	"encoding/json"
+	"fmt"
 )
 
 type host_data struct {
@@ -61,6 +62,7 @@ func main() {
 	displayStudents(sqliteDatabase)
 
 	http.HandleFunc("/send_ping", receive_ping)
+	http.HandleFunc("/get_list", print_list)
 	log.Println("Server listening on port 1337")
 	log.Fatal(http.ListenAndServe(":1337", nil))
 }
@@ -75,12 +77,23 @@ func receive_ping(w http.ResponseWriter, req *http.Request) {
 	}
 	ping_time, _ := time.Parse(time.StampMilli, beacon.Ping_time)
 	received_host := host_data{beacon.Host_name, ping_time}
-	//log.Println("User request | host: ", beacon.Host_name, " time: ", beacon.Ping_time)
 
 	insert_host(sqliteDatabase, received_host)
 
-	// TEMPORARY / should be an API call
-	displayStudents(sqliteDatabase)
+}
+
+func print_list(w http.ResponseWriter, req *http.Request) {
+	row, err := sqliteDatabase.Query("SELECT * FROM hosts ORDER BY host_name")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer row.Close()
+	for row.Next() { // Iterate and fetch the records from result cursor
+		var id int
+		var host_name, last_ping string
+		row.Scan(&id, &host_name, &last_ping)
+		fmt.Fprintf(w, "%s, %s\n", host_name, last_ping)
+	}
 }
 
 func create_host_table(db *sql.DB) {
