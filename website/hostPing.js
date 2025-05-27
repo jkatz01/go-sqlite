@@ -14,16 +14,16 @@ function someText() {
 
 function pingRandomHost() {
 	const hostNames = ["Somebody", "someone", "some dude", "buddy", "guh", "jsbrowser", "mike", "gus", "walter"];
-
+	var curr_time = getTimestamp();
 	fetch('http://localhost:1337/send_ping', {
 	mode: 'no-cors',
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json'
 	},
-	body: JSON.stringify({host_name: hostNames[Math.floor(Math.random() * 9)], ping_time: getTimestamp()})
-	}).then(res => res.json())
-	.then(res => console.log(res));
+	body: JSON.stringify({host_name: hostNames[Math.floor(Math.random() * 9)], ping_time: curr_time})
+	});
+	document.getElementById("date").innerHTML = "Date: " + curr_time;
 }
 
 

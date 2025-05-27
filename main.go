@@ -29,16 +29,19 @@ var sqliteDatabase *sql.DB
 
 // TODO: change naming
 func main() {
-	os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
+	//os.Remove("sqlite-database.db") // I delete the file to avoid duplicated records.
 	// SQLite is a file based database.
 
-	log.Println("Creating sqlite-database.db...")
-	file, err := os.Create("sqlite-database.db") // Create SQLite file
-	if err != nil {
-		log.Fatal(err.Error())
+	_, err_file := os.Stat("sqlite-database.db")
+	if (os.IsNotExist(err_file)) {
+		log.Println("Creating sqlite-database.db...")
+		file, err := os.Create("sqlite-database.db") // Create SQLite file
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		file.Close()
+		log.Println("sqlite-database.db created")
 	}
-	file.Close()
-	log.Println("sqlite-database.db created")
 
 	sqliteDatabase, _ = sql.Open("sqlite3", "./sqlite-database.db") // Open the created SQLite File
 	defer sqliteDatabase.Close()                                    // Defer Closing the database
@@ -91,10 +94,6 @@ func receive_ping(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		log.Println("Error: bad request", err)
 	}
-	data := ping_request{Host_name: "Guh", Ping_time: "guddy"}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(data)
 
 	ping_time, _ := time.Parse(time.StampMilli, beacon.Ping_time)
 	received_host := host_data{beacon.Host_name, ping_time}
